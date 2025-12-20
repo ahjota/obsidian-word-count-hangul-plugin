@@ -14,7 +14,7 @@ export class DailyTracker {
 	}
 
 	async initialize() {
-		const today = new Date().toISOString().split('T')[0];
+		const today = new Date().toISOString().split('T')[0] ?? '';
 		if (this.data.stats.date !== today) {
 			await this.resetForNewDay(today);
 		}
@@ -31,7 +31,7 @@ export class DailyTracker {
 	}
 
 	async updateFile(file: TFile) {
-		const today = new Date().toISOString().split('T')[0];
+		const today = new Date().toISOString().split('T')[0] ?? '';
 		if (this.data.stats.date !== today) {
 			await this.resetForNewDay(today);
 			return;
@@ -48,18 +48,16 @@ export class DailyTracker {
 
 	async handleRename(file: TAbstractFile, oldPath: string) {
 		if (file instanceof TFile && oldPath in this.data.stats.baselines) {
-			this.data.stats.baselines[file.path] = this.data.stats.baselines[oldPath];
-			delete this.data.stats.baselines[oldPath];
+			const oldBaseline = this.data.stats.baselines[oldPath];
+			if (oldBaseline !== undefined) {
+				this.data.stats.baselines[file.path] = oldBaseline;
+				delete this.data.stats.baselines[oldPath];
+			}
 		}
 	}
 
 	async handleDelete(file: TAbstractFile) {
 		if (file.path in this.data.stats.baselines) {
-			// We keep the progress made today on this file? 
-			// Actually, if we delete it, it's gone. 
-			// But for "characters written today", usually we want to count them even if deleted.
-			// However, without the file content we can't easily track changes anymore.
-			// For simplicity, we just remove it from baselines.
 			delete this.data.stats.baselines[file.path];
 			this.updateTotal();
 		}
@@ -70,13 +68,8 @@ export class DailyTracker {
 		let total = 0;
 
 		for (const path in currentCounts) {
-			const current = currentCounts[path];
-			const baseline = this.data.stats.baselines[path] || 0;
-			// Only count positive increases (written characters)
-			// If characters were deleted, we don't subtract from the "written today" total 
-			// unless the user wants "net change". 
-			// The prompt says "counts all characters written today", which usually implies net change or additive.
-			// Most word counters show net change for the day.
+			const current = currentCounts[path] ?? 0;
+			const baseline = this.data.stats.baselines[path] ?? 0;
 			total += (current - baseline);
 		}
 
@@ -84,18 +77,15 @@ export class DailyTracker {
 	}
 
 	getDailyTotal(): number {
-		// This is a bit inefficient to scan everything on every call, 
-		// but since we are debouncing in main.ts it might be okay.
-		// Alternatively, we could cache current counts.
-		return 0; // The real value is passed via onUpdate
+		return 0;
 	}
 
 	async getCalculatedTotal(): Promise<number> {
 		const currentCounts = await scanVault(this.app);
 		let total = 0;
 		for (const path in currentCounts) {
-			const current = currentCounts[path];
-			const baseline = this.data.stats.baselines[path] || 0;
+			const current = currentCounts[path] ?? 0;
+			const baseline = this.data.stats.baselines[path] ?? 0;
 			total += Math.max(0, current - baseline); 
 		}
 		return total;
