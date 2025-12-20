@@ -1,12 +1,13 @@
-import {TAbstractFile, TFile, Vault} from 'obsidian';
-import {PluginData, getTodayDate} from './storage';
-import {countCharacters} from './utils/counter';
+import { TAbstractFile, TFile, Vault } from "obsidian";
+import { PluginData, getTodayDate } from "./storage";
+import { countCharacters } from "./utils/counter";
 
 export class CharacterTracker {
 	private data: PluginData;
 	private vault: Vault;
 	private onUpdate: () => void;
-	private debounceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+	private debounceTimers: Map<string, ReturnType<typeof setTimeout>> =
+		new Map();
 	private initialized = false;
 
 	constructor(vault: Vault, data: PluginData, onUpdate: () => void) {
@@ -33,8 +34,8 @@ export class CharacterTracker {
 	}
 
 	async handleModify(file: TAbstractFile): Promise<void> {
-		if (!(file instanceof TFile) || file.extension !== 'md') return;
 		if (!this.initialized) return;
+		if (!(file instanceof TFile) || file.extension !== "md") return;
 
 		const existingTimer = this.debounceTimers.get(file.path);
 		if (existingTimer) {
@@ -74,7 +75,8 @@ export class CharacterTracker {
 	}
 
 	handleDelete(file: TAbstractFile): void {
-		if (!(file instanceof TFile) || file.extension !== 'md') return;
+		if (!this.initialized) return;
+		if (!(file instanceof TFile) || file.extension !== "md") return;
 
 		const timer = this.debounceTimers.get(file.path);
 		if (timer) {
@@ -87,6 +89,7 @@ export class CharacterTracker {
 	}
 
 	handleRename(file: TAbstractFile, oldPath: string): void {
+		if (!this.initialized) return;
 		if (!(file instanceof TFile)) return;
 
 		const timer = this.debounceTimers.get(oldPath);
@@ -95,8 +98,8 @@ export class CharacterTracker {
 			this.debounceTimers.delete(oldPath);
 		}
 
-		const oldWasMd = oldPath.endsWith('.md');
-		const newIsMd = file.extension === 'md';
+		const oldWasMd = oldPath.endsWith(".md");
+		const newIsMd = file.extension === "md";
 
 		if (oldWasMd && !newIsMd) {
 			delete this.data.fileCounts[oldPath];
@@ -114,8 +117,8 @@ export class CharacterTracker {
 	}
 
 	async handleCreate(file: TAbstractFile): Promise<void> {
-		if (!(file instanceof TFile) || file.extension !== 'md') return;
 		if (!this.initialized) return;
+		if (!(file instanceof TFile) || file.extension !== "md") return;
 		if (file.path in this.data.fileCounts) return;
 
 		this.checkDayRollover();
