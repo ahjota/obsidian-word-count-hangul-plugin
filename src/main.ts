@@ -1,11 +1,12 @@
 import { Notice, Plugin } from "obsidian";
 import { PluginData, mergeData } from "./storage";
 import { CharacterTracker } from "./tracker";
+import { DailyCharacterCountSettingTab } from "./settings";
 
 export default class DailyCharacterCountPlugin extends Plugin {
 	private statusBarItemEl: HTMLElement;
 	private tracker: CharacterTracker;
-	private data: PluginData;
+	data: PluginData;
 	private saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	async onload() {
@@ -68,6 +69,8 @@ export default class DailyCharacterCountPlugin extends Plugin {
 				new Notice("File counts recalculated");
 			},
 		});
+
+		this.addSettingTab(new DailyCharacterCountSettingTab(this.app, this));
 	}
 
 	onunload() {
@@ -94,6 +97,14 @@ export default class DailyCharacterCountPlugin extends Plugin {
 
 	private updateStatusBar(): void {
 		const count = this.tracker.getTodayCount();
-		this.statusBarItemEl.setText(`${count} chars today`);
+		if (count >= this.data.dailyGoal) {
+			this.statusBarItemEl.setText(`${count} chars today, great job 바봉이`);
+		} else {
+			this.statusBarItemEl.setText(`${count} chars today`);
+		}
+	}
+
+	refreshStatusBar(): void {
+		this.updateStatusBar();
 	}
 }
