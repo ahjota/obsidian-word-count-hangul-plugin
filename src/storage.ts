@@ -2,6 +2,7 @@ export interface PluginData {
 	fileCounts: Record<string, number>;
 	todayCount: number;
 	todayDate: string;
+	dailyGoal: number;
 }
 
 export function getTodayDate(): string {
@@ -14,6 +15,7 @@ export function mergeData(saved: Partial<PluginData> | null): PluginData {
 		fileCounts: saved?.fileCounts ?? {},
 		todayCount: saved?.todayCount ?? 0,
 		todayDate: saved?.todayDate ?? getTodayDate(),
+		dailyGoal: saved?.dailyGoal ?? 500,
 	};
 
 	const today = getTodayDate();
