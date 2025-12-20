@@ -39,6 +39,7 @@ export class CharacterTracker {
 
 	async handleModify(file: TAbstractFile): Promise<void> {
 		if (!(file instanceof TFile) || file.extension !== 'md') return;
+		if (!this.initialized) return;
 
 		const existingTimer = this.debounceTimers.get(file.path);
 		if (existingTimer) {
