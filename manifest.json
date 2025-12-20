@@ -1,9 +1,9 @@
 {
 	"id": "word-count-hangul",
-	"name": "Korean Character Count",
+	"name": "Daily Character Count",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Character counter with proper Korean syllable support. Counts characters in the active document including Korean, English, spaces, and punctuation.",
+	"description": "Tracks characters added today across all vault files. Updates incrementally as you edit, without scanning the entire vault.",
 	"author": "AJ",
 	"isDesktopOnly": false
 }
