@@ -97,6 +97,7 @@ export class CharacterTracker {
 
 	async handleCreate(file: TAbstractFile): Promise<void> {
 		if (!(file instanceof TFile) || file.extension !== 'md') return;
+		if (file.path in this.data.fileCounts) return;
 
 		this.checkDayRollover();
 
