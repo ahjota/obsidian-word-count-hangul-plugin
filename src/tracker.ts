@@ -8,16 +8,11 @@ export class CharacterTracker {
 	private onUpdate: () => void;
 	private debounceTimers: Map<string, ReturnType<typeof setTimeout>> =
 		new Map();
-	private initialized = false;
 
 	constructor(vault: Vault, data: PluginData, onUpdate: () => void) {
 		this.vault = vault;
 		this.data = data;
 		this.onUpdate = onUpdate;
-	}
-
-	setInitialized(): void {
-		this.initialized = true;
 	}
 
 	getTodayCount(): number {
@@ -34,7 +29,6 @@ export class CharacterTracker {
 	}
 
 	async handleModify(file: TAbstractFile): Promise<void> {
-		if (!this.initialized) return;
 		if (!(file instanceof TFile) || file.extension !== "md") return;
 
 		const existingTimer = this.debounceTimers.get(file.path);
@@ -75,7 +69,6 @@ export class CharacterTracker {
 	}
 
 	handleDelete(file: TAbstractFile): void {
-		if (!this.initialized) return;
 		if (!(file instanceof TFile) || file.extension !== "md") return;
 
 		const timer = this.debounceTimers.get(file.path);
@@ -89,7 +82,6 @@ export class CharacterTracker {
 	}
 
 	handleRename(file: TAbstractFile, oldPath: string): void {
-		if (!this.initialized) return;
 		if (!(file instanceof TFile)) return;
 
 		const timer = this.debounceTimers.get(oldPath);
@@ -117,7 +109,6 @@ export class CharacterTracker {
 	}
 
 	async handleCreate(file: TAbstractFile): Promise<void> {
-		if (!this.initialized) return;
 		if (!(file instanceof TFile) || file.extension !== "md") return;
 		if (file.path in this.data.fileCounts) return;
 

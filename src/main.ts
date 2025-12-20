@@ -37,14 +37,18 @@ export default class DailyCharacterCountPlugin extends Plugin {
 			),
 		);
 
+		this.app.workspace.onLayoutReady(() => {
+			this.registerEvent(
+				this.app.vault.on("create", (file) =>
+					this.tracker.handleCreate(file),
+				),
+			);
+		});
+
 		if (Object.keys(this.data.fileCounts).length === 0) {
 			setTimeout(() => {
-				void this.tracker.recalculateFileCounts().then(() => {
-					this.tracker.setInitialized();
-				});
+				void this.tracker.recalculateFileCounts();
 			}, 0);
-		} else {
-			this.tracker.setInitialized();
 		}
 
 		this.addCommand({
