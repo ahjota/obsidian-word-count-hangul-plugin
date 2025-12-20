@@ -6,8 +6,6 @@ export class CharacterTracker {
 	private data: PluginData;
 	private vault: Vault;
 	private onUpdate: () => void;
-	private debounceTimers: Map<string, ReturnType<typeof setTimeout>> =
-		new Map();
 
 	constructor(vault: Vault, data: PluginData, onUpdate: () => void) {
 		this.vault = vault;
@@ -30,21 +28,6 @@ export class CharacterTracker {
 
 	async handleModify(file: TAbstractFile): Promise<void> {
 		if (!(file instanceof TFile) || file.extension !== "md") return;
-
-		const existingTimer = this.debounceTimers.get(file.path);
-		if (existingTimer) {
-			clearTimeout(existingTimer);
-		}
-
-		const timer = setTimeout(() => {
-			this.debounceTimers.delete(file.path);
-			void this.processModify(file);
-		}, 300);
-
-		this.debounceTimers.set(file.path, timer);
-	}
-
-	private async processModify(file: TFile): Promise<void> {
 		this.checkDayRollover();
 
 		let content: string;
@@ -70,25 +53,12 @@ export class CharacterTracker {
 
 	handleDelete(file: TAbstractFile): void {
 		if (!(file instanceof TFile) || file.extension !== "md") return;
-
-		const timer = this.debounceTimers.get(file.path);
-		if (timer) {
-			clearTimeout(timer);
-			this.debounceTimers.delete(file.path);
-		}
-
 		delete this.data.fileCounts[file.path];
 		this.onUpdate();
 	}
 
 	handleRename(file: TAbstractFile, oldPath: string): void {
 		if (!(file instanceof TFile)) return;
-
-		const timer = this.debounceTimers.get(oldPath);
-		if (timer) {
-			clearTimeout(timer);
-			this.debounceTimers.delete(oldPath);
-		}
 
 		const oldWasMd = oldPath.endsWith(".md");
 		const newIsMd = file.extension === "md";
@@ -147,10 +117,4 @@ export class CharacterTracker {
 		this.onUpdate();
 	}
 
-	clearTimers(): void {
-		for (const timer of this.debounceTimers.values()) {
-			clearTimeout(timer);
-		}
-		this.debounceTimers.clear();
-	}
 }

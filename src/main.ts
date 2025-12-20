@@ -71,7 +71,6 @@ export default class DailyCharacterCountPlugin extends Plugin {
 	}
 
 	onunload() {
-		this.tracker.clearTimers();
 		if (this.saveTimeout) {
 			clearTimeout(this.saveTimeout);
 			this.saveTimeout = null;
