@@ -122,14 +122,4 @@ export class CharacterTracker {
 		this.data.todayCount = 0;
 		this.onUpdate();
 	}
-
-	recalculateTodayCount(): void {
-		this.checkDayRollover();
-		let total = 0;
-		for (const path in this.data.fileCounts) {
-			total += this.data.fileCounts[path] ?? 0;
-		}
-		this.data.todayCount = total;
-		this.onUpdate();
-	}
 }
