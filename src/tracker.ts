@@ -24,14 +24,12 @@ export class CharacterTracker {
 		return this.data.todayCount;
 	}
 
-	private checkDayRollover(): boolean {
+	private checkDayRollover(): void {
 		const today = getTodayDate();
 		if (this.data.todayDate !== today) {
 			this.data.todayCount = 0;
 			this.data.todayDate = today;
-			return true;
 		}
-		return false;
 	}
 
 	async handleModify(file: TAbstractFile): Promise<void> {
@@ -66,9 +64,10 @@ export class CharacterTracker {
 		const delta = newCount - oldCount;
 
 		this.data.fileCounts[file.path] = newCount;
+		this.data.todayCount += delta;
 
-		if (delta > 0) {
-			this.data.todayCount += delta;
+		if (this.data.todayCount < 0) {
+			this.data.todayCount = 0;
 		}
 
 		this.onUpdate();
