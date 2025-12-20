@@ -20,6 +20,10 @@ export default class DailyCharacterCountPlugin extends Plugin {
 		this.statusBarItemEl = this.addStatusBarItem();
 		this.updateStatusBar();
 
+		if (Object.keys(this.data.fileCounts).length === 0) {
+			await this.tracker.recalculateFileCounts();
+		}
+
 		this.registerEvent(
 			this.app.vault.on('modify', (file) => this.tracker.handleModify(file))
 		);
