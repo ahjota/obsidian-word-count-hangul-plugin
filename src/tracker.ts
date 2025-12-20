@@ -117,4 +117,10 @@ export class CharacterTracker {
 		this.onUpdate();
 	}
 
+	resetTodayCount(): void {
+		this.checkDayRollover();
+		this.data.todayCount = 0;
+		this.onUpdate();
+	}
+
 }
