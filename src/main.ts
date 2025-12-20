@@ -70,6 +70,25 @@ export default class DailyCharacterCountPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "reset-daily-count",
+			name: "Reset daily count to zero",
+			callback: () => {
+				this.tracker.resetTodayCount();
+				new Notice("Daily count reset to 0");
+			},
+		});
+
+		this.addCommand({
+			id: "recalculate-daily-count",
+			name: "Recalculate daily count",
+			callback: () => {
+				this.tracker.recalculateTodayCount();
+				const count = this.tracker.getTodayCount();
+				new Notice(`Daily count recalculated: ${count} characters`);
+			},
+		});
+
 		this.addSettingTab(new DailyCharacterCountSettingTab(this.app, this));
 	}
 
