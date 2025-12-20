@@ -4,12 +4,6 @@ export interface PluginData {
 	todayDate: string;
 }
 
-export const DEFAULT_DATA: PluginData = {
-	fileCounts: {},
-	todayCount: 0,
-	todayDate: getTodayDate(),
-};
-
 export function getTodayDate(): string {
 	const now = new Date();
 	return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;

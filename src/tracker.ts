@@ -19,22 +19,19 @@ export class CharacterTracker {
 		this.initialized = true;
 	}
 
-	getData(): PluginData {
-		return this.data;
-	}
-
 	getTodayCount(): number {
 		this.checkDayRollover();
 		return this.data.todayCount;
 	}
 
-	private checkDayRollover(): void {
+	private checkDayRollover(): boolean {
 		const today = getTodayDate();
 		if (this.data.todayDate !== today) {
 			this.data.todayCount = 0;
 			this.data.todayDate = today;
-			this.onUpdate();
+			return true;
 		}
+		return false;
 	}
 
 	async handleModify(file: TAbstractFile): Promise<void> {
@@ -57,7 +54,13 @@ export class CharacterTracker {
 	private async processModify(file: TFile): Promise<void> {
 		this.checkDayRollover();
 
-		const content = await this.vault.cachedRead(file);
+		let content: string;
+		try {
+			content = await this.vault.cachedRead(file);
+		} catch {
+			return;
+		}
+
 		const newCount = countCharacters(content);
 		const oldCount = this.data.fileCounts[file.path] ?? 0;
 		const delta = newCount - oldCount;
@@ -85,7 +88,7 @@ export class CharacterTracker {
 	}
 
 	handleRename(file: TAbstractFile, oldPath: string): void {
-		if (!(file instanceof TFile) || file.extension !== 'md') return;
+		if (!(file instanceof TFile)) return;
 
 		const timer = this.debounceTimers.get(oldPath);
 		if (timer) {
@@ -93,11 +96,21 @@ export class CharacterTracker {
 			this.debounceTimers.delete(oldPath);
 		}
 
-		const oldCount = this.data.fileCounts[oldPath];
-		if (oldCount !== undefined) {
-			this.data.fileCounts[file.path] = oldCount;
+		const oldWasMd = oldPath.endsWith('.md');
+		const newIsMd = file.extension === 'md';
+
+		if (oldWasMd && !newIsMd) {
 			delete this.data.fileCounts[oldPath];
 			this.onUpdate();
+		} else if (!oldWasMd && newIsMd) {
+			void this.handleCreate(file);
+		} else if (oldWasMd && newIsMd) {
+			const oldCount = this.data.fileCounts[oldPath];
+			if (oldCount !== undefined) {
+				this.data.fileCounts[file.path] = oldCount;
+				delete this.data.fileCounts[oldPath];
+				this.onUpdate();
+			}
 		}
 	}
 
@@ -108,7 +121,13 @@ export class CharacterTracker {
 
 		this.checkDayRollover();
 
-		const content = await this.vault.cachedRead(file);
+		let content: string;
+		try {
+			content = await this.vault.cachedRead(file);
+		} catch {
+			return;
+		}
+
 		const count = countCharacters(content);
 
 		this.data.fileCounts[file.path] = count;
@@ -124,8 +143,12 @@ export class CharacterTracker {
 
 		const files = this.vault.getMarkdownFiles();
 		for (const file of files) {
-			const content = await this.vault.cachedRead(file);
-			this.data.fileCounts[file.path] = countCharacters(content);
+			try {
+				const content = await this.vault.cachedRead(file);
+				this.data.fileCounts[file.path] = countCharacters(content);
+			} catch {
+				// File may have been deleted, skip it
+			}
 		}
 
 		this.onUpdate();
