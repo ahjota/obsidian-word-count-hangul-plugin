@@ -40,6 +40,8 @@ export default class DailyCharacterCountPlugin extends Plugin {
 			this.app.vault.on('create', (file) => this.tracker.handleCreate(file))
 		);
 
+		this.tracker.setInitialized();
+
 		this.addCommand({
 			id: 'show-daily-character-count',
 			name: 'Show character count',

@@ -7,11 +7,16 @@ export class CharacterTracker {
 	private vault: Vault;
 	private onUpdate: () => void;
 	private debounceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+	private initialized = false;
 
 	constructor(vault: Vault, data: PluginData, onUpdate: () => void) {
 		this.vault = vault;
 		this.data = data;
 		this.onUpdate = onUpdate;
+	}
+
+	setInitialized(): void {
+		this.initialized = true;
 	}
 
 	getData(): PluginData {
@@ -97,6 +102,7 @@ export class CharacterTracker {
 
 	async handleCreate(file: TAbstractFile): Promise<void> {
 		if (!(file instanceof TFile) || file.extension !== 'md') return;
+		if (!this.initialized) return;
 		if (file.path in this.data.fileCounts) return;
 
 		this.checkDayRollover();
