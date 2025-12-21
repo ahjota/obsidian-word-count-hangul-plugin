@@ -18,6 +18,30 @@ export class CharacterTracker {
 		return this.data.todayCount;
 	}
 
+	// Expose countCharacters method for editor extension use
+	countCharacters(text: string): number {
+		return countCharacters(text);
+	}
+
+	// Handle editor-based changes for real-time tracking
+	handleEditorChange(file: TFile, content: string): void {
+		if (file.extension !== 'md') return;
+		this.checkDayRollover();
+
+		const newCount = countCharacters(content);
+		const oldCount = this.data.fileCounts[file.path] ?? 0;
+		const delta = newCount - oldCount;
+
+		this.data.fileCounts[file.path] = newCount;
+		this.data.todayCount += delta;
+
+		if (this.data.todayCount < 0) {
+			this.data.todayCount = 0;
+		}
+
+		this.onUpdate();
+	}
+
 	private checkDayRollover(): void {
 		const today = getTodayDate();
 		if (this.data.todayDate !== today) {

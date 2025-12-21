@@ -1,4 +1,5 @@
-import { Notice, Plugin } from "obsidian";
+import { Notice, Plugin, editorInfoField, TFile } from "obsidian";
+import { EditorView } from "@codemirror/view";
 import { PluginData, mergeData } from "./storage";
 import { CharacterTracker } from "./tracker";
 import { DailyCharacterCountSettingTab } from "./settings";
@@ -46,6 +47,15 @@ export default class DailyCharacterCountPlugin extends Plugin {
 			);
 		});
 
+		// Register editor extension for real-time character tracking across all editors
+		this.registerEditorExtension(
+			EditorView.updateListener.of((update) => {
+				if (update.docChanged) {
+					this.handleEditorUpdate(update);
+				}
+			})
+		);
+
 		if (Object.keys(this.data.fileCounts).length === 0) {
 			setTimeout(() => {
 				void this.tracker.recalculateFileCounts();
@@ -89,6 +99,60 @@ export default class DailyCharacterCountPlugin extends Plugin {
 		}
 	}
 
+	private handleEditorUpdate(update: any): void {
+		const editor = update.view.editor;
+		if (!editor) return;
+
+		// Get the file associated with this editor
+		const file = this.getFileForEditor(update.view);
+		if (!file || file.extension !== 'md') return;
+
+		this.checkDayRollover();
+
+		// Get current content from editor
+		const content = editor.getValue();
+		const newCount = this.tracker.countCharacters(content);
+
+		// Get previous count for this file
+		const oldCount = this.data.fileCounts[file.path] ?? 0;
+		const delta = newCount - oldCount;
+
+		// Update counts
+		this.data.fileCounts[file.path] = newCount;
+		this.data.todayCount += delta;
+
+		if (this.data.todayCount < 0) {
+			this.data.todayCount = 0;
+		}
+
+		this.updateStatusBar();
+		this.debouncedSave();
+	}
+
+	private getFileForEditor(view: EditorView): TFile | null {
+		// Try to get the file from the editor's state
+		const state = view.state;
+		const file = state.field(editorInfoField)?.file;
+
+		if (file) return file;
+
+		// Fallback: try to get active file from workspace
+		return this.app.workspace.getActiveFile();
+	}
+
+	private checkDayRollover(): void {
+		const today = this.getTodayDate();
+		if (this.data.todayDate !== today) {
+			this.data.todayCount = 0;
+			this.data.todayDate = today;
+		}
+	}
+
+	private getTodayDate(): string {
+		const now = new Date();
+		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+	}
+
 	private handleUpdate(): void {
 		this.updateStatusBar();
 		this.debouncedSave();
@@ -98,10 +162,11 @@ export default class DailyCharacterCountPlugin extends Plugin {
 		if (this.saveTimeout) {
 			clearTimeout(this.saveTimeout);
 		}
+		// Increased delay for rapid typing to reduce disk I/O
 		this.saveTimeout = setTimeout(() => {
 			this.saveTimeout = null;
 			void this.saveData(this.data);
-		}, 1000);
+		}, 2000);
 	}
 
 	private updateStatusBar(): void {
