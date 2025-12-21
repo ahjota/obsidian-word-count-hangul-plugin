@@ -53,7 +53,7 @@ export default class DailyCharacterCountPlugin extends Plugin {
 				if (update.docChanged) {
 					this.handleEditorUpdate(update);
 				}
-			})
+			}),
 		);
 
 		if (Object.keys(this.data.fileCounts).length === 0) {
@@ -105,7 +105,7 @@ export default class DailyCharacterCountPlugin extends Plugin {
 
 		// Get the file associated with this editor
 		const file = this.getFileForEditor(update.view);
-		if (!file || file.extension !== 'md') return;
+		if (!file || file.extension !== "md") return;
 
 		this.checkDayRollover();
 
@@ -149,8 +149,10 @@ export default class DailyCharacterCountPlugin extends Plugin {
 	}
 
 	private getTodayDate(): string {
+		// obsidian provides moment.js, but that is overkill for this.
+		// use luxon.js if you need to do more with dates.
 		const now = new Date();
-		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 	}
 
 	private handleUpdate(): void {
@@ -172,7 +174,9 @@ export default class DailyCharacterCountPlugin extends Plugin {
 	private updateStatusBar(): void {
 		const count = this.tracker.getTodayCount();
 		if (count >= this.data.dailyGoal) {
-			this.statusBarItemEl.setText(`${count} chars today, great job 바봉이`);
+			this.statusBarItemEl.setText(
+				`${count} chars today, great job 바봉이`,
+			);
 		} else {
 			this.statusBarItemEl.setText(`${count} chars today`);
 		}
