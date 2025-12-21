@@ -1,7 +1,6 @@
 {
 	"id": "word-count-hangul",
 	"name": "Daily Character Count",
-	"version": "1.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Tracks characters added today across all vault files with real-time updates as you type. Uses editor extensions for immediate feedback without full vault scans.",
 	"author": "AJ",
