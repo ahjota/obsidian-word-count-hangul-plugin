@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-word-count-hangul",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Tracks characters added today across all vault files",
 	"main": "main.js",
 	"type": "module",
@@ -24,6 +24,7 @@
 		"typescript-eslint": "8.35.1"
 	},
 	"dependencies": {
+		"@codemirror/view": "^6.38.6",
 		"cjk-regex": "^3.4.0",
 		"obsidian": "latest"
 	}
