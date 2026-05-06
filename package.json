@@ -24,6 +24,7 @@
 		"typescript-eslint": "8.35.1"
 	},
 	"dependencies": {
+		"@codemirror/view": "^6.41.1",
 		"cjk-regex": "^3.4.0",
 		"obsidian": "latest"
 	}

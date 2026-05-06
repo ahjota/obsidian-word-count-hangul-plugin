@@ -1,5 +1,5 @@
 import { Notice, Plugin, editorInfoField, TFile } from "obsidian";
-import { EditorView } from "@codemirror/view";
+import { EditorView, ViewUpdate } from "@codemirror/view";
 import { PluginData, mergeData } from "./storage";
 import { CharacterTracker } from "./tracker";
 import { DailyCharacterCountSettingTab } from "./settings";
@@ -99,10 +99,7 @@ export default class DailyCharacterCountPlugin extends Plugin {
 		}
 	}
 
-	private handleEditorUpdate(update: any): void {
-		const editor = update.view.editor;
-		if (!editor) return;
-
+	private handleEditorUpdate(update: ViewUpdate): void {
 		// Get the file associated with this editor
 		const file = this.getFileForEditor(update.view);
 		if (!file || file.extension !== "md") return;
@@ -110,7 +107,7 @@ export default class DailyCharacterCountPlugin extends Plugin {
 		this.checkDayRollover();
 
 		// Get current content from editor
-		const content = editor.getValue();
+		const content = update.view.state.doc.toString();
 		const newCount = this.tracker.countCharacters(content);
 
 		// Get previous count for this file
@@ -131,10 +128,13 @@ export default class DailyCharacterCountPlugin extends Plugin {
 
 	private getFileForEditor(view: EditorView): TFile | null {
 		// Try to get the file from the editor's state
-		const state = view.state;
-		const file = state.field(editorInfoField)?.file;
-
-		if (file) return file;
+		try {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+			const file = (view.state.field as any)(editorInfoField)?.file as TFile | null;
+			if (file) return file;
+		} catch {
+			// Field not available, fallback below
+		}
 
 		// Fallback: try to get active file from workspace
 		return this.app.workspace.getActiveFile();
