@@ -43,7 +43,7 @@ export class CharacterTracker {
 	}
 
 	private checkDayRollover(): void {
-		const today = getTodayDate();
+		const today = getTodayDate(this.data.dailyResetHour);
 		if (this.data.todayDate !== today) {
 			this.data.todayCount = 0;
 			this.data.todayDate = today;
