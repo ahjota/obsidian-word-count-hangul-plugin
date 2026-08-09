@@ -27,7 +27,7 @@ This project supports development in a devcontainer, so you can build and lint w
 
 ### Devcontainer
 
-A `.devcontainer/` configuration is included for use with VS Code Dev Containers, GitHub Codespaces, or any remote Docker host. The container provides Node 20 LTS, npm, and the project's dev dependencies automatically.
+A `.devcontainer/` configuration is included for use with VS Code Dev Containers, GitHub Codespaces, or any remote Docker host. The container provides Node 22 LTS, npm, and the project's dev dependencies automatically.
 
 1. Open the repository in VS Code with the Dev Containers extension, or create a Codespace on GitHub.
 2. The container builds and runs `npm install` automatically on first open.
