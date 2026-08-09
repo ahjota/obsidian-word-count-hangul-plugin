@@ -1,0 +1,24 @@
+{
+	"name": "Obsidian Plugin Dev",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"postCreateCommand": "npm install",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint"
+			],
+			"settings": {
+				"editor.formatOnSave": false,
+				"eslint.workingDirectories": ["${workspaceFolder}"]
+			}
+		}
+	},
+	"remoteEnv": {
+		"NODE_ENV": "development"
+	},
+	"codespaces": {
+		"openFiles": ["src/main.ts"]
+	}
+}

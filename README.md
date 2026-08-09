@@ -21,6 +21,52 @@ An Obsidian plugin that tracks characters added today across all vault files wit
 
 - **Daily goal** - Set a daily character count goal (default: 500)
 
+## Development
+
+This project supports development in a devcontainer, so you can build and lint without installing Node or any npm packages on your host machine.
+
+### Devcontainer
+
+A `.devcontainer/` configuration is included for use with VS Code Dev Containers, GitHub Codespaces, or any remote Docker host. The container provides Node 22 LTS, npm, and the project's dev dependencies automatically.
+
+1. Open the repository in VS Code with the Dev Containers extension, or create a Codespace on GitHub.
+2. The container builds and runs `npm install` automatically on first open.
+3. Build the plugin:
+   ```bash
+   npm run build
+   ```
+   This runs `tsc` for type checking and `esbuild` to bundle `src/` into `main.js`.
+4. Lint:
+   ```bash
+   npm run lint
+   ```
+
+### Deploying to a vault
+
+After building, copy the release artifacts (`main.js`, `manifest.json`, `styles.css`) into your Obsidian vault's plugin folder. A shell script automates this with no Node dependency:
+
+```bash
+./scripts/copy-to-vault.sh
+```
+
+The script auto-discovers your vaults from Obsidian's config (`~/Library/Application Support/obsidian/obsidian.json` on macOS). If you have multiple vaults, it lists them sorted by most recently opened and prompts you to pick. Vaults that already have the plugin folder are marked with "(plugin folder exists)".
+
+To skip the prompt, set the vault path explicitly:
+
+```bash
+OBSIDIAN_VAULT_PATH=/path/to/vault ./scripts/copy-to-vault.sh
+```
+
+The plugin folder must already exist at `<vault>/.obsidian/plugins/word-count-hangul/`. If it doesn't, the script will tell you the exact `mkdir -p` command to run.
+
+After copying, reload Obsidian and enable the plugin in **Settings → Community plugins**.
+
+### Full workflow
+
+1. **Devcontainer**: edit source, run `npm run build` to produce `main.js`
+2. **Host**: run `./scripts/copy-to-vault.sh` to copy artifacts into your vault
+3. **Obsidian**: reload and enable the plugin to test
+
 ## Technical Details
 
 This plugin uses Obsidian's editor extension API with CodeMirror 6 to provide real-time character counting:
