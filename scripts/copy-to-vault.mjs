@@ -17,13 +17,7 @@
  * or "npm run build" then "npm run copy:vault" for copy-only.
  */
 
-import {
-	copyFileSync,
-	existsSync,
-	readFileSync,
-	readlinkSync,
-	statSync,
-} from "node:fs";
+import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import readline from "node:readline/promises";
