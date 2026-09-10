@@ -149,10 +149,16 @@ export default class DailyCharacterCountPlugin extends Plugin {
 	}
 
 	private getTodayDate(): string {
-		// obsidian provides moment.js, but that is overkill for this.
-		// use luxon.js if you need to do more with dates.
 		const now = new Date();
-		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+		let checkDate = new Date(now);
+		
+		// Adjust the date based on reset hour
+		// If current hour is before reset hour, we're still in "yesterday"
+		if (now.getHours() < this.data.dailyResetHour) {
+			checkDate.setDate(checkDate.getDate() - 1);
+		}
+		
+		return `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
 	}
 
 	private handleUpdate(): void {
